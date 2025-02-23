@@ -12,6 +12,15 @@ from rich.console import Console
 from rich.table import Table
 from tqdm import tqdm
 
+# Banner PocketFi
+BANNER = """
+╔══════════════════════════════════════════════╗
+║       🌟 POCKETFI BOT - Automated Mining     ║
+║ Automate your PocketFi mining and tasks!     ║
+║  Developed by: https://t.me/sentineldiscus   ║
+╚══════════════════════════════════════════════╝
+"""
+
 # Setup logging dengan RichHandler
 logging.basicConfig(
     level="INFO",
@@ -131,11 +140,6 @@ class PocketFi:
             response.raise_for_status()
             data = response.json()
             updated_for_day = data.get("updatedForDay")
-            # Menyembunyikan log "Sudah check-in hari ini" dan "Klaim harian berhasil"
-            # if updated_for_day:
-            #     logger.info("Klaim harian berhasil")
-            # else:
-            #     logger.info("Sudah check-in hari ini")
             pass  # Tidak ada log untuk boost harian
         except (requests.RequestException, TimeoutError) as e:
             logger.error(f"Gagal klaim harian: {str(e)}")
@@ -164,18 +168,14 @@ class PocketFi:
 
         total_tasks = len([task for task in all_tasks if task.get("doneAmount") == 0])
         if total_tasks == 0:
-            # Menyembunyikan log "Tidak ada tugas yang perlu dilakukan"
-            # logger.info("Tidak ada tugas yang perlu dilakukan")
-            pass
+            pass  # Tidak ada log untuk "Tidak ada tugas yang perlu dilakukan"
             return
 
         for task_count, task in enumerate(all_tasks, 1):
             if task.get("doneAmount") == 0:
                 task_code = task.get("code", "Unknown")
-                # Gunakan console.print untuk menimpa baris sebelumnya
                 console.print(f"[yellow]Memulai tugas {task_count}/{total_tasks}[/]", end="\r")
                 self.do_task(task_code, init_data)
-        # Kosongkan baris setelah semua tugas selesai
         console.print(" " * 50, end="\r")
 
     def process_account(self, index, init_data):
@@ -202,12 +202,8 @@ class PocketFi:
                     "saldo": str(user_mining.get("gotAmount", "0")),
                     "kecepatan": str(user_mining.get("speed", "0"))
                 }
-                # Menyembunyikan log "Mengaktifkan boost harian..."
                 self.activate_daily_boost(init_data)
-                # Menyembunyikan log "Memulai claim..."
-                # logger.info(f"Akun {index} | {user_name} - Memulai claim...")
                 self.claim_mining(init_data)
-                # Menyembunyikan log "Memulai misi..."
                 self.manage_task(init_data)
             else:
                 logger.error(f"Akun {index}: Gagal mendapatkan info mining")
@@ -249,6 +245,7 @@ class PocketFi:
         console.print(table)
 
     def main(self):
+        console.print(BANNER)  # Tampilkan banner di awal
         data_file = Path(__file__).parent / "data.txt"
         if not data_file.exists():
             logger.error("File data.txt tidak ditemukan")
@@ -274,12 +271,11 @@ class PocketFi:
                     except Exception as e:
                         logger.error(f"Thread error: {str(e)}")
 
-            # Pastikan tabel selalu ditampilkan, bahkan jika ada error
             logger.info("Menampilkan tabel hasil mining...")
             self.display_mining_table()
 
-            logger.info("Menunggu 5 jam untuk melanjutkan...")
-            self.countdown(4 * 60 * 60)  # 5 jam dalam detik
+            logger.info("Menunggu 4 jam untuk melanjutkan...")
+            self.countdown(4 * 60 * 60)  # 4 jam dalam detik (disesuaikan dari 5 jam)
 
 if __name__ == "__main__":
     pocket_fi = PocketFi()
